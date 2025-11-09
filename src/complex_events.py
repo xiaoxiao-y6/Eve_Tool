@@ -15,7 +15,7 @@ load_dotenv(find_dotenv())
 # 从环境变量获取总览区域
 overview_area = eval(os.getenv('overview_area'))
 list_of_text_confidence = eval(os.getenv('list_of_text_confidence'))
-screen_resolution = eval(os.getenv('screen_resolution'))
+my_screen_resolution = eval(os.getenv('my_screen_resolution'))
 game_scaling = eval(os.getenv('game_scaling'))
 
 def Goto_OrdinaryMineralBelt():
@@ -32,7 +32,7 @@ def Goto_OrdinaryMineralBelt():
     )
     sleep(1)
 
-    if screen_resolution == "4K" and game_scaling == 100:
+    if my_screen_resolution == (3840,2160) and game_scaling == 100:
         bbox = screen_information_judgment.locate_template_on_screen(
             r'assets\screenshot_comparison_4K_100\information_bar\leap_indicator.png',
             threshold=float(os.getenv('is_state_active_threshold', 0.8))
@@ -58,7 +58,7 @@ def Docking_StarCity():
         offset_range=3
     )
     sleep(1)
-    if screen_resolution == "4K" and game_scaling == 100:
+    if my_screen_resolution == (3840,2160) and game_scaling == 100:
         bbox = screen_information_judgment.locate_template_on_screen(
             r'assets\screenshot_comparison_4K_100\information_bar\StarCity.png',
             threshold=float(os.getenv('is_state_active_threshold', 0.8))
