@@ -169,22 +169,22 @@ def get_mouse_position():
     x, y = pyautogui.position()
     return [x, y]
 
-def random_click_in_circle(center, button=0, radius=5):
+def random_click_in_circle(center, button=0, radius=5, delay_before_click=0.7):
     """
     在指定坐标为中心、给定半径的圆形范围内随机点击。
     
     参数:
-        center (list): [x, y] 基准坐标
+        center (list or tuple): [x, y] 基准坐标
         button (int): 0 表示左键，1 表示右键
         radius (int): 随机偏移的像素半径（默认 5）
+        delay_before_click (float): 鼠标移动到目标位置后、点击前的等待时间（秒），默认 0.7
     """
     if not isinstance(center, (list, tuple)) or len(center) != 2:
         raise ValueError("center 必须是包含两个元素的列表或元组，如 [x, y]")
     
     x, y = center
 
-    # 在圆形区域内生成均匀分布的随机点
-    # 使用极坐标：r = sqrt(rand) * R, theta = 2π * rand
+    # 在圆形区域内生成均匀分布的随机点（使用极坐标）
     r = radius * math.sqrt(random.random())
     theta = random.uniform(0, 2 * math.pi)
     
@@ -194,7 +194,13 @@ def random_click_in_circle(center, button=0, radius=5):
     click_x = x + offset_x
     click_y = y + offset_y
 
-    # 确定按键
+    # 移动鼠标到目标位置（pyautogui.click 会自动移动，但显式移动便于控制）
+    pyautogui.moveTo(click_x, click_y)
+
+    # 等待指定时间后再点击
+    time.sleep(delay_before_click)
+
+    # 执行点击
     pyautogui.click(
         x=click_x,
         y=click_y,

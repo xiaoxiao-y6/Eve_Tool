@@ -30,8 +30,6 @@ def Goto_OrdinaryMineralBelt():
         click_button=1,
         offset_range=3
     )
-    sleep(1)
-
     if my_screen_resolution == (3840,2160) and game_scaling == 100:
         bbox = screen_information_judgment.locate_template_on_screen(
             r'assets\screenshot_comparison_4K_100\information_bar\leap_indicator.png',
@@ -57,7 +55,6 @@ def Docking_StarCity():
         click_button=1,
         offset_range=3
     )
-    sleep(1)
     if my_screen_resolution == (3840,2160) and game_scaling == 100:
         bbox = screen_information_judgment.locate_template_on_screen(
             r'assets\screenshot_comparison_4K_100\information_bar\StarCity.png',
@@ -72,22 +69,18 @@ def Docking_StarCity():
         mouse_keyboard.click_random_point_in_ellipse(bbox, click_button=0, debug=True)
 
 
-def OverviewArea_Modified():
+def update_env_region(name: str):
     '''
-    总览区域修改
-    通过交互式方式重新定位总览区域，并更新项目根目录下的 .env 文件中的 overview_area。
-    若 .env 文件不存在，则提示“未找到”并退出。
+    通用区域参数更新函数
+    通过交互式方式获取屏幕区域参数，并更新项目根目录下 .env 文件中指定的键。
+    
+    参数:
+        name (str): 要更新的 .env 键名，如 "overview_area"
     '''
-    # 获取当前脚本所在的绝对路径 (complex_events.py)
+    # 获取当前脚本所在目录 (假设此脚本位于 src/)
     current_file_path = os.path.abspath(__file__)
-    
-    # 获取当前脚本所在目录 (src/)
     current_dir = os.path.dirname(current_file_path)
-    
-    # 假设项目根目录是当前目录的上一级 (即 src 的父目录)
-    project_root = os.path.dirname(current_dir)
-    
-    # 构造 .env 文件在项目根目录下的完整路径
+    project_root = os.path.dirname(current_dir)  # 项目根目录为 src 的父目录
     env_path = os.path.join(project_root, ".env")
 
     # 检查 .env 文件是否存在
@@ -96,32 +89,39 @@ def OverviewArea_Modified():
         return
 
     try:
-        # 获取新的区域参数（应为 tuple）
+        # 获取新的区域参数（应为四元组 tuple）
         new_region = window_status.list_positioning()
         print(f"✅ 已获取新区域参数: {new_region}")
 
-        # 验证返回值是否为 tuple 且包含4个元素
+        # 验证返回值是否为有效四元组
         if not isinstance(new_region, tuple) or len(new_region) != 4:
             print("❌ 获取的区域参数格式无效，应为四元组 (x, y, width, height)")
             return
 
-        # 转为字符串（不加引号，避免读取时需二次解析）
+        # 转为字符串形式（不加引号，便于后续 eval）
         region_str = str(new_region)
 
-        # 安全写入 .env 文件（不加引号）
+        # 安全写入 .env 文件，不加引号
         set_key(
             dotenv_path=env_path,
-            key_to_set="overview_area",
+            key_to_set=name,
             value_to_set=region_str,
             quote_mode="never"
         )
 
-        print(f"✅ .env 文件已成功更新：overview_area = {region_str}")
-        overview_area = eval(os.getenv('overview_area'))  # 转换为元组
-        screen_information_judgment.highlight_region_on_screen(rect = overview_area, duration=2000)
+        print(f"✅ .env 文件已成功更新：{name} = {region_str}")
 
-    except AttributeError:
-        print("❌ 错误：window_status 或 list_positioning() 未定义，请检查依赖。")
+        # 可选：可视化反馈（仅当模块可用且键为区域类参数时才合理）
+        # 此处保留原逻辑，但需确保 name 对应的值是区域参数
+        try:
+            # 注意：此处需确保环境变量已重新加载，或直接使用 region_str
+            # 为避免依赖 os.getenv（可能未刷新），直接使用 new_region
+            screen_information_judgment.highlight_region_on_screen(rect=new_region, duration=2000)
+        except Exception as vis_error:
+            print(f"⚠️ 可视化高亮失败（不影响写入）: {vis_error}")
+
+    except AttributeError as ae:
+        print(f"❌ 依赖错误：{ae}。请确保 window_status 和 list_positioning() 已正确定义。")
     except Exception as e:
         print(f"❌ 更新 .env 文件时发生错误: {e}")
 
@@ -175,3 +175,45 @@ def update_env_from_mouse(name):
         print(f"✅ 已更新 {name} = {pos_str}")
     except Exception as e:
         print(f"❌ 写入 .env 文件失败: {e}")
+
+def Replace_MiningHead(Collector = "C",text = "None"):
+    '''
+    更换矿头
+    1. 右键需要更换矿头
+    2. 左键选择需要的矿头
+    '''
+
+    CollectorA = eval(os.getenv('CollectorA'))
+    CollectorB = eval(os.getenv('CollectorB'))
+    arm_area = eval(os.getenv('arm_area'))
+
+    if my_screen_resolution == (3840,2160) and game_scaling == 100:
+        if Collector == "A" and CollectorA is not None:
+            mouse_keyboard.random_click_in_circle(CollectorA, button=1,radius = 2)
+        elif Collector == "B":
+            mouse_keyboard.random_click_in_circle(CollectorB, button=1,radius = 2)
+        else:
+            print("❌ 无效的矿头位置")
+            return True
+    else:
+        print("❌ 不支持的屏幕分辨率或游戏缩放")
+        return False
+
+
+    if my_screen_resolution == (3840,2160) and game_scaling == 100:
+        bbox = screen_information_judgment.locate_template_on_screen(
+            r'assets\screenshot_comparison_4K_100\arm\ammunition\crystal\PolymerCrystal_B.png',
+            threshold=0.8
+            )
+        mouse_keyboard.click_random_point_in_ellipse(bbox, click_button=0, debug=True)
+
+
+    # mouse_keyboard.click_on_text_in_region(
+    #     target_text=text,
+    #     region=arm_area,
+    #     click_button=0,
+    #     offset_range=3
+    # )
+
+# update_env_from_mouse("CollectorB")
+Replace_MiningHead(Collector = "A",text = "聚合小行星采集晶体B型")
